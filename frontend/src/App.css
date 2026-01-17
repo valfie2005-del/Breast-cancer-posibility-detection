@@ -1,0 +1,149 @@
+/* Gradient background */
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ed988a, #f5f3f3);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  width: 750px;
+  animation: fadeIn 0.7s ease-in-out;
+}
+
+.card h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #ed988a;
+  font-weight: 700;
+}
+
+/* Grid Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: capitalize;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: #ed988a;
+  box-shadow: 0 0 6px #f1b6ac;
+}
+
+/* Buttons */
+.btn-group {
+  grid-column: span 2;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn.predict {
+  background: #ed988a;
+  color: #fff;
+}
+
+.btn.predict:hover {
+  background: #d26b5d;
+}
+
+.btn.clear {
+  background: #333;
+  color: white;
+}
+
+.btn.clear:hover {
+  background: #000;
+}
+
+/* Result Card */
+.result-card {
+  margin-top: 25px;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  background: #f9fafb;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: slideUp 0.5s ease-in-out;
+}
+
+.algo {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.prediction {
+  font-size: 20px;
+  font-weight: bold;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.prediction.benign {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.prediction.malignant {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Loading */
+.loading {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ed988a;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
