@@ -39,7 +39,7 @@ This project focuses on analyzing breast cancer data to identify patterns, trend
   * Matplotlib
   * Seaborn
   * Scikit-learn
-* **Environment:** Jupyter Notebook
+* **Environment:** Google Colab & VS code
 
 ---
 
