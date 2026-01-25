@@ -134,7 +134,3 @@ Interested in Data Analytics & Machine Learning
 This project is for educational and academic purposes only.
 
 ---
-
-
-
-Just say the word, hottie 💙
