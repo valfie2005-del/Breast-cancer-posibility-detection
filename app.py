@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pickle
 import numpy as np
+from pathlib import Path
 
 # 1️⃣ Create FastAPI app instance first
 app = FastAPI()
@@ -19,11 +20,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 3️⃣ Load model + scaler
-with open("best_model.pkl", "rb") as f:
+
+
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "best_model.pkl"
+
+with MODEL_PATH.open("rb") as f:
     saved = pickle.load(f)
-    model = saved["model"]
-    scaler = saved["scaler"]
+
+model = saved["model"]
+scaler = saved["scaler"]
 
 # 4️⃣ Define input data structure
 class InputData(BaseModel):

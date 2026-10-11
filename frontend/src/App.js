@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import "./App.css";
 
@@ -21,11 +22,16 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleClear = () => {
-    setFormData(initialForm);
+    setFormData({ ...initialForm });
     setResult("");
     setAlgorithm("");
   };
@@ -37,17 +43,38 @@ function App() {
     setAlgorithm("");
 
     try {
-      const res = await fetch("http://localhost:8000/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const payload = Object.fromEntries(
+        Object.entries(formData).map(([key, value]) => [
+          key,
+          Number(value),
+        ])
+      );
+
+      const API_URL = process.env.REACT_APP_API_URL;
+
+      const res = await fetch(`${API_URL}/predict`, {
+         method: "POST",
+         headers: {
+              "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+  });
+
       const data = await res.json();
-      setAlgorithm(data.best_algorithm || "Algorithm Info Not Available");
+
+      if (!res.ok) {
+        throw new Error(
+          data.detail || "Prediction request failed"
+        );
+      }
+
       setResult(data.prediction);
+      setAlgorithm(data.best_algorithm || "");
     } catch (err) {
       console.error(err);
-      setResult("⚠️ Error: Could not fetch prediction");
+      setResult(
+        `Error: ${err.message || "Could not fetch prediction"}`
+      );
     } finally {
       setLoading(false);
     }
@@ -56,12 +83,17 @@ function App() {
   return (
     <div className="app-container">
       <div className="card">
-        <h1>🩺 Mammo Assit</h1>
+        <h1>🩺 Mammo Assist</h1>
+
         <form onSubmit={handleSubmit} className="form-grid">
           {Object.keys(formData).map((key) => (
             <div key={key} className="form-group">
-              <label>{key.replace(/_/g, " ")}</label>
+              <label htmlFor={key}>
+                {key.replace(/_/g, " ")}
+              </label>
+
               <input
+                id={key}
                 type="number"
                 step="any"
                 name={key}
@@ -71,24 +103,52 @@ function App() {
               />
             </div>
           ))}
+
           <div className="btn-group">
-            <button type="submit" className="btn predict">Predict</button>
-            <button type="button" onClick={handleClear} className="btn clear">Clear</button>
+            <button
+              type="submit"
+              className="btn predict"
+              disabled={loading}
+            >
+              {loading ? "Predicting..." : "Predict"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClear}
+              className="btn clear"
+              disabled={loading}
+            >
+              Clear
+            </button>
           </div>
         </form>
 
-        {loading && <div className="loading">⏳ Predicting...</div>}
+        {loading && (
+          <div className="loading">
+            ⏳ Predicting...
+          </div>
+        )}
 
         {!loading && result && (
           <div className="result-card">
-            
             <p
               className={`prediction ${
-                result.includes("Benign") ? "benign" : "malignant"
+                result.includes("Benign")
+                  ? "benign"
+                  : result.includes("Malignant")
+                    ? "malignant"
+                    : "error"
               }`}
             >
               {result}
             </p>
+
+            {algorithm && (
+              <p className="algorithm">
+                Algorithm: {algorithm}
+              </p>
+            )}
           </div>
         )}
       </div>
