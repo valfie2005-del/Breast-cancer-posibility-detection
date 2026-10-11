@@ -16,13 +16,12 @@ A full-stack machine learning web application that predicts whether a breast tum
 6. [How It Works](#-how-it-works)
 7. [Input & Output](#-input--output)
 8. [Installation & Setup](#-installation--setup)
-9. [Environment Variables](#-environment-variables)
-10. [Database](#-database)
-11. [Authentication](#-authentication)
-12. [Model Training & Evaluation](#-model-training--evaluation)
-13. [Future Enhancements](#-future-enhancements)
-14. [Author](#-author)
-15. [License](#-license)
+9. [Database](#-database)
+10. [Authentication](#-authentication)
+11. [Model Training & Evaluation](#-model-training--evaluation)
+12. [Future Enhancements](#-future-enhancements)
+13. [Author](#-author)
+14. [License](#-license)
 
 ---
 
