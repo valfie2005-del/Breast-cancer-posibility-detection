@@ -52,26 +52,50 @@ function App() {
 
       const API_URL = process.env.REACT_APP_API_URL;
 
-      const res = await fetch(`${API_URL}/predict`, {
-         method: "POST",
-         headers: {
-              "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-  });
+      if (!API_URL) {
+        throw new Error(
+          "Backend URL is missing. Set REACT_APP_API_URL in Vercel."
+        );
+      }
 
-      const data = await res.json();
+      const res = await fetch(`${API_URL}/predict`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await res.text();
+      let data;
+
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        throw new Error(
+          `Backend returned non-JSON data (HTTP ${res.status}). ` +
+          "Check the backend URL and Vercel logs."
+        );
+      }
 
       if (!res.ok) {
         throw new Error(
-          data.detail || "Prediction request failed"
+          data?.detail ||
+          data?.error ||
+          `Request failed: HTTP ${res.status}`
+        );
+      }
+
+      if (!data || !data.prediction) {
+        throw new Error(
+          "Backend response is missing the prediction field."
         );
       }
 
       setResult(data.prediction);
       setAlgorithm(data.best_algorithm || "");
     } catch (err) {
-      console.error(err);
+      console.error("Prediction error:", err);
       setResult(
         `Error: ${err.message || "Could not fetch prediction"}`
       );
