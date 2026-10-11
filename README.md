@@ -99,18 +99,12 @@ Breast-cancer-possibility-detection/
 │   │   └── ...
 │   └── package.json
 │
-├── breast-cancer-app/      # Earlier/alternate React app (same CRA layout)
-│   ├── public/
-│   ├── src/
-│   └── package.json
-│
 ├── package.json            # Root-level Node config
 ├── package-lock.json
 ├── .gitignore
 └── README.md
 ```
 
-> 📝 `frontend/` and `breast-cancer-app/` share the same Create React App structure. Keep whichever one is actively used and remove or archive the other to avoid confusion.
 
 ---
 
