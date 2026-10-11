@@ -1,26 +1,26 @@
-from fastapi import FastAPI
+from pathlib import Path
+import pickle
+
+import numpy as np
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import pickle
-import numpy as np
-from pathlib import Path
 
-# 1️⃣ Create FastAPI app instance first
 app = FastAPI()
 
-# 2️⃣ Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000",
-                   "http://127.0.0.1:3000",
-                   "http://localhost:5173",
-                   "http://127.0.0.1:5173"],  # React dev server
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://breast-cancer-posibility-detection.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "best_model.pkl"
@@ -31,7 +31,7 @@ with MODEL_PATH.open("rb") as f:
 model = saved["model"]
 scaler = saved["scaler"]
 
-# 4️⃣ Define input data structure
+
 class InputData(BaseModel):
     radius_mean: float
     texture_mean: float
@@ -44,8 +44,11 @@ class InputData(BaseModel):
     perimeter_mean: float
     concave_points_mean: float
 
-# 5️⃣ Define prediction endpoint
-@app.post("/predict")
+
+router = APIRouter()
+
+
+@router.post("/predict")
 def predict(data: InputData):
     features = np.array([[
         data.radius_mean,
@@ -57,7 +60,7 @@ def predict(data: InputData):
         data.fractal_dimension_mean,
         data.area_mean,
         data.perimeter_mean,
-        data.concave_points_mean
+        data.concave_points_mean,
     ]])
     features = scaler.transform(features)
     prediction = model.predict(features)[0]
@@ -65,6 +68,11 @@ def predict(data: InputData):
     return {"prediction": result}
 
 
-@app.get("/")
+@router.get("/")
 def root():
     return {"message": "Backend is running 🚀. Go to /docs to test /predict"}
+
+
+# Works whether Vercel keeps or strips the /api prefix
+app.include_router(router)
+app.include_router(router, prefix="/api")

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "./App.css";
 
@@ -50,13 +49,12 @@ function App() {
         ])
       );
 
-      const API_URL = process.env.REACT_APP_API_URL;
-
-      if (!API_URL) {
-        throw new Error(
-          "Backend URL is missing. Set REACT_APP_API_URL in Vercel."
-        );
-      }
+      // Env var wins if set; otherwise /api on Vercel, local server in dev
+      const API_URL =
+        process.env.REACT_APP_API_URL ||
+        (process.env.NODE_ENV === "production"
+          ? "/api"
+          : "http://127.0.0.1:8000");
 
       const res = await fetch(`${API_URL}/predict`, {
         method: "POST",
