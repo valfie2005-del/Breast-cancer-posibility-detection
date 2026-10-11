@@ -1,4 +1,21 @@
+# Python environment
+.venv/
 venv/
-node_modules/
 __pycache__/
+*.py[cod]
+
+# Secrets and local configuration
 .env
+.env.*
+!.env.example
+
+# IDE and cache
+.idea/
+.vscode/
+.pytest_cache/
+
+# Logs
+*.log
+
+# Optional local datasets
+# data/
