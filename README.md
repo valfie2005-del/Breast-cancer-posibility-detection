@@ -232,55 +232,9 @@ The app opens at `http://localhost:3000`.
 
 ---
 
-## 🔐 Environment Variables
-
-The project currently runs without any required environment variables. For cleaner configuration, you can add the following:
-
-**Backend (`.env`)**
-
-```env
-FLASK_ENV=development
-PORT=5000
-MODEL_PATH=best_model.pkl
-SCALER_PATH=scaler.pkl
-ALLOWED_ORIGINS=http://localhost:3000
-```
-
-**Frontend (`frontend/.env`)**
-
-```env
-REACT_APP_API_URL=http://localhost:5000
-```
-
-> Never commit `.env` files. Make sure they are listed in `.gitignore`, and provide a `.env.example` instead.
-
----
-
 ## 🗄️ Database
 
 **Currently: none.** The app is stateless. Each prediction is computed on the fly from the user's input and the saved `.pkl` files, and nothing is stored.
-
-If you later want to save prediction history, a simple schema could look like this:
-
-```sql
-CREATE TABLE users (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    email         TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE predictions (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id       INTEGER REFERENCES users(id),
-    input_json    TEXT NOT NULL,        -- the submitted feature values
-    prediction    TEXT NOT NULL,        -- Malignant / Benign
-    probability   REAL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-SQLite is enough to start; PostgreSQL or MySQL are better for production.
 
 ---
 
@@ -317,7 +271,6 @@ SQLite is enough to start; PostgreSQL or MySQL are better for production.
 **Models compared**
 
 - Logistic Regression
-- Support Vector Machine (SVM)
 - K-Nearest Neighbors (KNN)
 - Decision Tree Classifier
 
