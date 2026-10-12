@@ -1,9 +1,11 @@
+
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "$schema": "https://breast-cancer-posibility-detection.vercel.app",
   "services": {
     "app": {
       "root": ".",
-      "runtime": "python"
+      "entrypoint": "app:app",
+      "framework": "fastapi"
     },
     "frontend": {
       "root": "frontend",
@@ -11,6 +13,12 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/api",
+      "destination": {
+        "service": "app"
+      }
+    },
     {
       "source": "/api/(.*)",
       "destination": {
