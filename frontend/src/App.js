@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import "./App.css";
 
-function App() {
-  const initialForm = {
-    radius_mean: "",
-    texture_mean: "",
-    smoothness_mean: "",
-    compactness_mean: "",
-    concavity_mean: "",
-    symmetry_mean: "",
-    fractal_dimension_mean: "",
-    area_mean: "",
-    perimeter_mean: "",
-    concave_points_mean: "",
-  };
+const initialForm = {
+  radius_mean: "",
+  texture_mean: "",
+  smoothness_mean: "",
+  compactness_mean: "",
+  concavity_mean: "",
+  symmetry_mean: "",
+  fractal_dimension_mean: "",
+  area_mean: "",
+  perimeter_mean: "",
+  concave_points_mean: "",
+};
 
-  const [formData, setFormData] = useState(initialForm);
+function App() {
+  const [formData, setFormData] = useState({ ...initialForm });
   const [result, setResult] = useState("");
   const [algorithm, setAlgorithm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,11 +37,29 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     setResult("");
     setAlgorithm("");
 
     try {
+      // Configure REACT_APP_API_URL in Vercel.
+      // Example: https://your-backend.vercel.app
+      const configuredUrl = process.env.REACT_APP_API_URL?.trim();
+
+      if (
+        process.env.NODE_ENV === "production" &&
+        !configuredUrl
+      ) {
+        throw new Error(
+          "Backend API URL is missing. Configure REACT_APP_API_URL in Vercel."
+        );
+      }
+
+      const API_URL = (
+        configuredUrl || "http://127.0.0.1:8000"
+      ).replace(/\/+$/, "");
+
       const payload = Object.fromEntries(
         Object.entries(formData).map(([key, value]) => [
           key,
@@ -49,44 +67,55 @@ function App() {
         ])
       );
 
-      // Env var wins if set; otherwise /api on Vercel, local server in dev
-      const API_URL =
-        process.env.REACT_APP_API_URL ||
-        (process.env.NODE_ENV === "production"
-          ? "/api"
-          : "http://127.0.0.1:8000");
+      // Ensure all values are valid numbers.
+      if (
+        Object.values(formData).some(
+          (value) => value.trim() === "" || !Number.isFinite(Number(value))
+        )
+      ) {
+        throw new Error("Please enter valid numbers in every field.");
+      }
 
-      const res = await fetch(`${API_URL}/predict`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const responseText = await res.text();
+      let response;
+
+      try {
+        response = await fetch(`${API_URL}/predict`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      const responseText = await response.text();
       let data;
 
       try {
         data = responseText ? JSON.parse(responseText) : null;
       } catch {
         throw new Error(
-          `Backend returned non-JSON data (HTTP ${res.status}). ` +
-          "Check the backend URL and Vercel logs."
+          `The backend returned an invalid response (HTTP ${response.status}). Check your backend URL and deployment logs.`
         );
       }
 
-      if (!res.ok) {
+      if (!response.ok) {
         throw new Error(
           data?.detail ||
-          data?.error ||
-          `Request failed: HTTP ${res.status}`
+            data?.error ||
+            `Request failed with HTTP ${response.status}.`
         );
       }
 
-      if (!data || !data.prediction) {
+      if (!data || typeof data.prediction !== "string") {
         throw new Error(
-          "Backend response is missing the prediction field."
+          "The backend response does not contain a valid prediction."
         );
       }
 
@@ -94,9 +123,17 @@ function App() {
       setAlgorithm(data.best_algorithm || "");
     } catch (err) {
       console.error("Prediction error:", err);
-      setResult(
-        `Error: ${err.message || "Could not fetch prediction"}`
-      );
+
+      let message = err.message || "Could not fetch prediction.";
+
+      if (err.name === "AbortError") {
+        message = "The request timed out. Please try again.";
+      } else if (err instanceof TypeError) {
+        message =
+          "Failed to fetch. Check the backend URL, backend availability, and CORS settings.";
+      }
+
+      setResult(`Error: ${message}`);
     } finally {
       setLoading(false);
     }
@@ -106,6 +143,10 @@ function App() {
     <div className="app-container">
       <div className="card">
         <h1>🩺 Mammo Assist</h1>
+
+        <p>
+          Enter the required measurements to obtain a model prediction.
+        </p>
 
         <form onSubmit={handleSubmit} className="form-grid">
           {Object.keys(formData).map((key) => (
@@ -122,6 +163,7 @@ function App() {
                 value={formData[key]}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </div>
           ))}
@@ -147,20 +189,22 @@ function App() {
         </form>
 
         {loading && (
-          <div className="loading">
+          <div className="loading" role="status">
             ⏳ Predicting...
           </div>
         )}
 
         {!loading && result && (
-          <div className="result-card">
+          <div className="result-card" aria-live="polite">
             <p
               className={`prediction ${
-                result.includes("Benign")
-                  ? "benign"
-                  : result.includes("Malignant")
-                    ? "malignant"
-                    : "error"
+                result.startsWith("Error:")
+                  ? "error"
+                  : result.includes("Benign")
+                    ? "benign"
+                    : result.includes("Malignant")
+                      ? "malignant"
+                      : "error"
               }`}
             >
               {result}
@@ -173,6 +217,13 @@ function App() {
             )}
           </div>
         )}
+
+        <p className="disclaimer">
+          This tool provides a machine-learning prediction for
+          educational purposes only. It is not a medical diagnosis
+          and must not replace assessment by a qualified healthcare
+          professional.
+        </p>
       </div>
     </div>
   );
